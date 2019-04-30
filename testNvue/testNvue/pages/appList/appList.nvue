@@ -1,0 +1,161 @@
+<template>
+  <scroller>
+  <div class="holder">
+    <!-- <text class="title">Only support Android & IOS</text> -->
+    <div class="item">
+      <text class="label">type = "text"</text>
+      <input class="input" type="text"/>
+    </div>
+    <div class="item">
+      <text class="label">type = "password"</text>
+      <input class="input" type="password"/>
+    </div>
+    <div class="item">
+      <text class="label">type = "tel"</text>
+      <input class="input" type="tel"/>
+    </div>
+    <div class="item">
+      <text class="label">type = "date" (Android & IOS)</text>
+      <input class="input" type="date"/>
+    </div>
+    <div class="item">
+      <text class="label">type = "time" (Android & IOS)</text>
+      <input class="input" type="time"/>
+    </div>
+    <div class="item">
+      <text class="label">type = "numuber"</text>
+      <input class="input" type="number" />
+    </div>
+    <div class="item">
+      <div class="btn-holder">
+        <div class="btn" @click="focus"><text class="btn-text">focus</text></div>
+        <div class="btn" @click="blur"><text class="btn-text">blur</text></div>
+      </div>
+      <input ref="widget" class="input" type="text" @focus="handleFocus" @blur="handleBlur" @return="handleReturn" />
+    </div>
+    <div class="item">
+      <div class="btn-holder">
+        <div class="btn" @click="setRange"><text class="btn-text">setSelectionRange (Android & IOS)</text></div>
+        <div class="btn" @click="getRange"><text class="btn-text">getSelectionRange</text></div>
+      </div>
+      <input :value="text" ref="range" class="input" type="text" />
+    </div>
+  </div>
+  </scroller>
+</template>
+
+<script>
+const modal = weex.requireModule('modal');
+const toast = message => {
+  modal.toast({
+    message,
+    duration: 1,
+  });
+};
+
+export default {
+  data() {
+    return {
+      text: '0123456',
+    };
+  },
+  methods: {
+    setRange() {
+      this.$refs.range.setSelectionRange(1, 4);
+    },
+    getRange() {
+      this.$refs.range.getSelectionRange(params => {
+        toast(`当前文本选区为 ${params.selectionStart} ~ ${params.selectionEnd}`);
+      });
+    },
+    focus() {
+      this.$refs.widget.focus();
+    },
+    blur() {
+      this.$refs.widget.blur();
+    },
+    handleFocus() {
+      toast('获得焦点');
+    },
+    handleBlur() {
+      toast('失去焦点');
+    },
+    handleReturn() {
+      toast('点击了回车按钮');
+    },
+  },
+};
+</script>
+
+
+<style>
+.holder {
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+}
+.title {
+  font-size: 50px;
+  color: red;
+  margin-bottom: 20px;
+}
+.warning {
+  color: red;
+}
+.item {
+  /* flex-direction: row; */
+  /* align-items: center; */
+
+  margin-bottom: 20px;
+
+  /* border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px; */
+  border-left-width: 10px;
+
+  /* border-color: #0088fb; */
+  border-left-color: #0088fb;
+  background-color: #ececec;
+
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 30px;
+}
+.btn-holder {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.btn {
+  background-color: #0088fb;
+  margin-bottom: 10px;
+  height: 60px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 30px;
+}
+.btn-text {
+  color: #fff;
+  font-size: 30px;
+}
+.label {
+  /* width: 100px; */
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+.input {
+  background-color: #fff;
+  padding-left: 10px;
+  border-width: 1px;
+  height: 80px;
+  font-size: 30px;
+  border-radius: 10px;
+  width: 600px;
+}
+</style>

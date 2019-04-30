@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "聊天窗口chat",
+  "softinputMode": "adjustResize",
+  "usingComponents": {
+    "page-foot": "/components/page-foot",
+    "chat-input": "/components/im-chat/chatinput",
+    "message-show": "/components/im-chat/messageshow"
+  }
+}

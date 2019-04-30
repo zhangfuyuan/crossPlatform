@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/test/test"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationStyle": "custom",
+    "animationType": "none"
+  },
+  "nvue": {
+    "pages": {
+      "pages/appList/appList.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      },
+      "pages/index/index.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      }
+    },
+    "entryPagePath": "pages/index/index"
+  },
+  "splashscreen": {
+    "alwaysShowBeforeRender": true,
+    "autoclose": false
+  },
+  "appname": "testNvue",
+  "compilerVersion": "1.9.4",
+  "usingComponents": {}
+}
