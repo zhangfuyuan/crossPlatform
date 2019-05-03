@@ -1,0 +1,21 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index"
+		}, {
+			"path": "pages/appList/appList"
+		}, {
+			"path": "pages/infoPublish/infoPublishIndex"
+		}, {
+			"path": "pages/infoPublish/infoPublishSingle"
+		}, {
+			"path": "pages/block/block"
+		}
+	],
+	"globalStyle": {
+		"navigationStyle": "custom",
+		"app-plus": {
+			"animationType": "none"
+		}
+	}
+}

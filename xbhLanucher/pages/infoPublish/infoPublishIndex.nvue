@@ -1,0 +1,60 @@
+<template>
+	<div class="infoPublishIndex-wrap">
+		<text class="network-txt" @click="launchApp()">联网发布</text>
+		<text class="single-txt" @click="navTo()">单机发布</text>
+	</div>
+</template>
+
+<script>
+	const globalEvent = weex.requireModule('globalEvent');
+	
+	export default {
+		data() {
+			return {
+			}
+		},
+		methods: {
+			launchApp() {
+				if (typeof uni !== 'undefined') {
+					// 调启外部应用
+					uni.postMessage({
+						module: 'launchApp',
+						package: ['com.harison.adver']
+					});
+				}
+			},
+			navTo() {
+				if (typeof uni !== 'undefined') {
+					uni.navigateTo({
+						url: '../infoPublish/infoPublishSingle'
+					});
+				}
+			}
+		}
+	}
+</script>
+
+<style>
+	.infoPublishIndex-wrap {
+		width: 750px;
+		background-color: #2C2C2C;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+	.network-txt {
+		font-size: 16px;
+		color: #ffffff;
+		margin-right: 100px;
+	}
+	.single-txt {
+		font-size: 16px;
+		color: #ffffff;
+	}
+	.network-txt:active {
+		color: #3babd0;
+	}
+	.network-txt:active {
+		color: #3babd0;
+	}
+</style>

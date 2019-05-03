@@ -1,0 +1,334 @@
+<template>
+	<div class="home-wrap">
+		<div :class="['home-net', isLandscape?'is-landscape-home-net':'']">
+			<div :class="[isLandscape?'is-landscape-net-info':'net-info']">
+				<text :class="['net-id', isLandscape?'is-landscape-net-id':'']">ID : {{netId}}</text>
+				<text :class="['net-ip', isLandscape?'is-landscape-net-ip':'']">IP : {{netIp}}</text>
+			</div>
+			
+			<image resize="contain" :class="[isLandscape?'is-landscape-net-way':'net-way']" :src="netWayUrl"></image>
+		</div>
+		
+		<div :class="['home-cont', isLandscape?'is-landscape-home-cont':'']">
+			<div class="cut-box" v-if="isLandscape">
+				<div class="is-landscape-cut-line-row1"></div>
+				<div class="is-landscape-cut-line-col1"></div>
+				<div class="is-landscape-cut-line-col2"></div>
+			</div>
+			
+			<div class="cut-box" v-else>
+				<div class="cut-line-col1"></div>
+				<div class="cut-line-row1"></div>
+				<div class="cut-line-row2"></div>
+			</div>
+			
+			<div :class="['shortcut-cell', isLandscape?'is-landscape-shortcut-cell':'']" 
+				 v-if="shortcutList.length>0"  
+				 v-for="(shortcut, index) in shortcutList" 
+				 :key="index" 
+				 @click="launchApp(shortcut, index)">
+				<image :class="['shortcut-img', isLandscape?'is-landscape-shortcut-img':'']" 
+					   :src="activeIndex===index ? shortcut.activeUrl : shortcut.url"></image>
+				<text :class="['shortcut-txt', isLandscape?'is-landscape-shortcut-txt':'', activeIndex===index?'shortcut-txt-active':'']">{{shortcut.name}}</text>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	var modal = weex.requireModule('modal');
+	const globalEvent = weex.requireModule('globalEvent');
+	
+	export default {
+		data() {
+			return {
+				dWidth: WXEnvironment.deviceWidth,
+				dHeight: WXEnvironment.deviceHeight,
+				isLandscape: +WXEnvironment.deviceWidth > +WXEnvironment.deviceHeight, //是否横屏（默认竖屏）
+				shortcutList: [
+					{
+						label: 'information',
+						name: '信息发布', // 小百合播放器包名：com.harison.adver
+						url: '/static/images/information.png',
+						activeUrl: '/static/images/information_on.png',
+						package: ['com.harison.adver']
+					}, {
+						label: 'file_manager',
+						name: '文件管理', // 资源管理器包名：3288 -> com.android.rk
+						url: '/static/images/file_manager.png',
+						activeUrl: '/static/images/file_manager_on.png',
+						package: ['com.android.rk']
+					}, {
+						label: 'time_switch',
+						name: '定时开关', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
+						url: '/static/images/time_switch.png',
+						activeUrl: '/static/images/time_switch_on.png',
+						package: ['com.lango.system.settings', 'com.android.settings']
+					}, {
+						label: 'network_settings',
+						name: '网络设置', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
+						url: '/static/images/network_settings.png',
+						activeUrl: '/static/images/network_settings_on.png',
+						package: ['com.lango.system.settings', 'com.android.settings']
+					}, {
+						label: 'browser',
+						name: '浏览器', // 浏览器包名：com.android.browser
+						url: '/static/images/browser.png',
+						activeUrl: '/static/images/browser_on.png',
+						package: ['com.android.browser']
+					}, {
+						label: 'application',
+						name: '应用列表',
+						url: '/static/images/application.png',
+						activeUrl: '/static/images/application_on.png'
+					}, 
+				],
+				activeIndex: 0,
+				netId: '00-00-00-00-00-00',
+				netIp: '0.0.0.0',
+				netWayUrl: '/static/images/lan_disabled.png',
+				navigateToFlag: false
+			}
+		},
+		created() {
+			globalEvent.addEventListener("plusMessage", e => {
+			    console.log(e.data.module);
+				
+			    if (e.data.res) {
+						if (e.data.module === 'MAC&IP') {
+							this.netId = e.data.res.mac;
+							this.netIp = e.data.res.ip;
+						}
+			    }
+			});
+		},
+		mounted() {
+			var self = this;
+			
+			if (typeof uni !== 'undefined') {
+				// 获取设备MAC地址和IP地址
+				uni.postMessage({module:"MAC&IP"});
+				
+				// 获取设备网络连接状态
+				uni.getNetworkType({
+					success(res) {
+						let type = res.networkType;
+						
+						modal.toast({
+							message: res.networkType
+						})
+						
+						if (type === 'wifi') {
+							self.netWayUrl = '/static/images/wifi_four.png';
+						} else if (type === '2g' || type === '3g' || type === '4g') {
+							self.netWayUrl = '/static/images/mobile_network_four.png';
+						} else if (type === 'ethernet') {
+							self.netWayUrl = '/static/images/lan.png';
+						} else if (type === 'unknown') {
+							self.netWayUrl = '/static/images/lan_unavailable.png';
+						}
+					}
+				});
+				
+				// 动态设置 focusable 和 focusableInTouchMode
+				/*uni.postMessage({
+					module: 'mounted'
+				});*/
+			}
+		},
+		methods: {
+			launchApp(obj, index) {
+				if (this.navigateToFlag) return false;
+				
+				let self = this;
+				this.activeIndex = index;
+				modal.toast({
+					message: obj.name
+				})
+				
+				if (typeof uni !== 'undefined') {
+					if (obj.label === 'application') {
+						this.navigateToFlag = true;
+						
+						uni.navigateTo({
+							url: '../appList/appList',
+							complete() {
+								self.navigateToFlag = false;
+							}
+						});
+					} else if (obj.label === 'information') {
+						this.navigateToFlag = true;
+						
+						uni.navigateTo({
+							url: '../infoPublish/infoPublishIndex',
+							complete() {
+								self.navigateToFlag = false;
+							}
+						});
+					} else {
+						// 调启外部应用
+						uni.postMessage({
+							module: 'launchApp',
+							package: obj.package
+						});
+					}
+				}
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	.home-wrap {
+		width: 750px;
+		background-color: #2C2C2C;
+		justify-content: center;
+		align-items: center;
+	}
+	.home-net {
+		position: absolute;
+		top: 21px;
+		right: 21px;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+	}
+	.is-landscape-home-net { /*横屏*/
+		top: 12px;
+		right: 12px;
+	}
+	.net-info {
+		margin-right: 28px;
+	}
+	.is-landscape-net-info { /*横屏*/
+		margin-right: 16px;
+	}
+	.net-id {
+		color: #fff;
+		font-size: 12px;
+		margin-bottom: 12px;
+	}
+	.is-landscape-net-id { /*横屏*/
+		font-size: 7px;
+		margin-bottom: 7px;
+	}
+	.net-ip {
+		font-size: 12px;
+		color: #fff;
+	}
+	.is-landscape-net-ip { /*横屏*/
+		font-size: 7px;
+	}
+	.net-way {
+		width: 28px;
+		height: 28px;
+	}
+	.is-landscape-net-way { /*横屏*/
+		width: 16px;
+		height: 16px;
+	}
+	.home-cont {
+		width: 523px;
+		height: 783px;
+		flex-direction: row;
+		flex-wrap: wrap;
+		position: relative;
+	}
+	.is-landscape-home-cont { /*横屏*/
+		width: 442px;
+		height: 294px;
+	}
+	.cut-box {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+	}
+	.cut-line-col1 {
+		position: absolute;
+		top: 0px;
+		left: 259px;
+		width: 4px;
+		height: 783px;
+		background-image: linear-gradient(to right, #111111, #464646);
+	}
+	.cut-line-row1 {
+		position: absolute;
+		top: 259px;
+		left: 0px;
+		width: 522px;
+		height: 4px;
+		background-image: linear-gradient(to bottom, #111111, #464646);
+	}
+	.cut-line-row2 {
+		position: absolute;
+		top: 520px;
+		left: 0px;
+		width: 522px;
+		height: 4px;
+		background-image: linear-gradient(to bottom, #111111, #464646);
+	}
+	.is-landscape-cut-line-row1 { /*横屏*/
+		position: absolute;
+		top: 145px;
+		left: 0px;
+		width: 441px;
+		height: 4px;
+		background-image: linear-gradient(to bottom, #111111, #464646);
+	}
+	.is-landscape-cut-line-col1 { /*横屏*/
+		position: absolute;
+		top: 0px;
+		left: 145px;
+		width: 4px;
+		height: 294px;
+		background-image: linear-gradient(to right, #111111, #464646);
+	}
+	.is-landscape-cut-line-col2 { /*横屏*/
+		position: absolute;
+		top: 0px;
+		left: 292px;
+		width: 4px;
+		height: 294px;
+		background-image: linear-gradient(to right, #111111, #464646);
+	}
+	.shortcut-cell {
+		width: 261px;
+		height: 261px;
+		justify-content: center;
+		align-items: center;
+	}
+	.is-landscape-shortcut-cell { /*横屏*/
+		width: 147px;
+		height: 147px;
+	}
+	.hide-input {
+		background-color: #fff;
+		padding-left: 10px;
+		border-width: 1px;
+		height: 80px;
+		font-size: 30px;
+		border-radius: 10px;
+		width: 80px;
+		opacity: 0;
+	}
+	.shortcut-img {
+		width: 82px;
+		height: 82px;
+	}
+	.is-landscape-shortcut-img { /*横屏*/
+		width: 47px;
+		height: 47px;
+	}
+	.shortcut-txt {
+		padding-top: 32px;
+		font-size: 20px;
+		color: #c0c6c9;
+	}
+	.is-landscape-shortcut-txt { /*横屏*/
+		padding-top: 18px;
+		font-size: 11px;
+	}
+	.shortcut-txt-active {
+		color: #3babd0;
+	}
+</style>

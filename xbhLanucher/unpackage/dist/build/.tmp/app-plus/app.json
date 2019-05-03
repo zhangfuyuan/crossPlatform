@@ -1,0 +1,38 @@
+{
+  "pages": [
+    "pages/appList/appList",
+    "pages/block/block"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationStyle": "custom",
+    "animationType": "none"
+  },
+  "nvue": {
+    "pages": {
+      "pages/infoPublish/infoPublishSingle.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      },
+      "pages/infoPublish/infoPublishIndex.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      },
+      "pages/index/index.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      }
+    },
+    "entryPagePath": "pages/index/index"
+  },
+  "splashscreen": {
+    "alwaysShowBeforeRender": true,
+    "autoclose": false
+  },
+  "appname": "xbhLanucher",
+  "compilerVersion": "1.9.4",
+  "usingComponents": {}
+}

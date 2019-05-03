@@ -1,0 +1,92 @@
+<template>
+	<div class="infoPublishSingle-wrap">
+		<div class="cont">
+			<image class="img" 
+						 v-for="(temp, index) in tempList" 
+						 :key="index" 
+						 @click="launchTemp(temp, index)" 
+						 resize="contain" 
+						 :src="activeIndex===index ? temp.activeUrl : temp.url"></image>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				tempList: [
+					{
+						label: 'add',
+						url: '/static/images/template_add.png',
+						activeUrl: '/static/images/template_add_on.png'
+					}, {
+						label: 'dual',
+						url: '/static/images/template_dual.png',
+						activeUrl: '/static/images/template_dual_on.png'
+					}, {
+						label: 'eight',
+						url: '/static/images/template_eight.png',
+						activeUrl: '/static/images/template_eight_on.png'
+					}, {
+						label: 'eleven',
+						url: '/static/images/template_eleven.png',
+						activeUrl: '/static/images/template_eleven_on.png'
+					}, {
+						label: 'five',
+						url: '/static/images/template_five.png',
+						activeUrl: '/static/images/template_five_on.png'
+					}, {
+						label: 'four',
+						url: '/static/images/template_four.png',
+						activeUrl: '/static/images/template_four_on.png'
+					}, {
+						label: 'land_add',
+						url: '/static/images/template_land_add.png',
+						activeUrl: '/static/images/template_land_add_on.png'
+					}, {
+						label: 'land_dual',
+						url: '/static/images/template_land_dual.png',
+						activeUrl: '/static/images/template_land_dual_on.png'
+					}, {
+						label: 'land_eight',
+						url: '/static/images/template_land_eight.png',
+						activeUrl: '/static/images/template_land_eight_on.png'
+					}, {
+						label: 'land_four',
+						url: '/static/images/template_land_four.png',
+						activeUrl: '/static/images/template_land_four_on.png'
+					}
+					
+				],
+				activeIndex: 0
+			}
+		},
+		methods: {
+			launchTemp(temp, index) {
+				this.activeIndex = index;
+			}
+		}
+	}
+</script>
+
+<style>
+	.infoPublishSingle-wrap {
+		width: 750px;
+		background-color: #2C2C2C;
+		justify-content: center;
+		align-items: center;
+	}
+	.cont {
+		width: 750px;
+		height: 1000px;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: space-between;
+	}
+	.img {
+		width: 200px;
+		height: 200px;
+	}
+</style>

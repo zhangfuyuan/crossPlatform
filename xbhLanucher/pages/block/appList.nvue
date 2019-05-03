@@ -1,0 +1,68 @@
+<template>
+	<div>
+		<div v-if="appList&&appList.length>0" v-for="(app, index) in appList" :key="index" @click="launchApp(app, index)">
+			<image style="width: 48px; height: 48px;" :src="app.appIcon"></image>
+			<text>{{app.appName}}</text>
+		</div>
+	</div>
+</template>
+
+<script>
+	var modal = weex.requireModule('modal');
+	const globalEvent = weex.requireModule('globalEvent');
+	
+	export default {
+		data() {
+			return {
+				dWidth: WXEnvironment.deviceWidth,
+				dHeight: WXEnvironment.deviceHeight,
+				isLandscape: +WXEnvironment.deviceWidth > +WXEnvironment.deviceHeight, //是否横屏（默认竖屏）
+				appList: null,
+				activeIndex: 0,
+				navigateToFlag: false
+			}
+		},
+		created() {
+			globalEvent.addEventListener("plusMessage", e => {
+			    console.log(e.data.module);
+				
+			    if (e.data.res && e.data.res.length>0 && e.data.module==='appList') {
+						//console.log("获取系统已安装应用列表:" + JSON.stringify(e.data.res));
+						
+						this.appList = e.data.res.filter((item, index) => {
+							return index < 12;
+						});
+			    }
+			});
+		},
+		mounted() {
+			if (typeof uni !== 'undefined') {
+				// 获取系统应用列表
+				uni.postMessage({module:"appList"});
+			}
+		},
+		methods: {
+			launchApp(obj, index) {
+				if (this.navigateToFlag) return false;
+				
+				let self = this;
+				this.activeIndex = index;
+				modal.toast({
+					message: obj.appName
+				})
+				
+				if (typeof uni !== 'undefined') {
+					// 调启外部应用
+					uni.postMessage({
+						module: 'launchApp',
+						package: obj.appPackage
+					});
+				}
+			}
+		}
+	}
+</script>
+
+<style>
+
+</style>
