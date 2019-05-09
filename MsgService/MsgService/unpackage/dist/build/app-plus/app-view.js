@@ -1063,11 +1063,6 @@ if( __WXML_GLOBAL__.ops_cached.$gwx_1)return __WXML_GLOBAL__.ops_cached.$gwx_1
 __WXML_GLOBAL__.ops_cached.$gwx_1=[];
 (function(z){var a=11;function Z(ops){z.push(ops)}
 Z([3,'__l'])
-Z([3,'content'])
-Z([3,'logo'])
-Z([3,'/static/logo.png'])
-Z([3,'title'])
-Z([a,[[7],[3,'title']]])
 })(__WXML_GLOBAL__.ops_cached.$gwx_1);return __WXML_GLOBAL__.ops_cached.$gwx_1
 }
 __WXML_GLOBAL__.ops_set.$gwx=z;
@@ -1078,22 +1073,8 @@ var x=['./pages/index/index.wxml'];d_[x[0]]={}
 var m0=function(e,s,r,gg){
 var z=gz$gwx_1()
 cs.push("./pages/index/index.wxml:view:1:1")
-var oB=_mz(z,'view',['bind:__l',0,'class',1],[],e,s,gg)
-cs.push("./pages/index/index.wxml:image:1:38")
-var xC=_mz(z,'image',['class',2,'src',1],[],e,s,gg)
-cs.pop()
-_(oB,xC)
-cs.push("./pages/index/index.wxml:view:1:89")
-var oD=_n('view')
-cs.push("./pages/index/index.wxml:text:1:95")
-var fE=_n('text')
-_rz(z,fE,'class',4,e,s,gg)
-var cF=_oz(z,5,e,s,gg)
-_(fE,cF)
-cs.pop()
-_(oD,fE)
-cs.pop()
-_(oB,oD)
+var oB=_n('view')
+_rz(z,oB,'bind:__l',0,e,s,gg)
 cs.pop()
 _(r,oB)
 return r
@@ -1157,7 +1138,7 @@ var setCssToHead = function(file, _xcInvalid, info) {
 var Ca = {};
 var css_id;
 var info = info || {};
-var _C= [[[2,1],],[],];
+var _C= [[[2,1],],["body { background-color: #2C2C2C; }\n",],];
 function makeup(file, opt) {
 var _n = typeof(file) === "number";
 if ( _n && Ca.hasOwnProperty(file)) return "";
@@ -1226,7 +1207,7 @@ setCssToHead([])();setCssToHead([[2,0]],undefined,{path:"./app.wxss"})();
 __wxAppCode__['app.wxss']=setCssToHead([[2,0]],undefined,{path:"./app.wxss"});    
 __wxAppCode__['app.wxml']=$gwx('./app.wxml');
 
-__wxAppCode__['pages/index/index.wxss']=setCssToHead([".",[1],"content { text-align: center; height: ",[0,400],"; }\n.",[1],"logo { height: ",[0,200],"; width: ",[0,200],"; margin-top: ",[0,200],"; }\n.",[1],"title { font-size: ",[0,36],"; color: #8f8f94; }\n",],undefined,{path:"./pages/index/index.wxss"});    
+__wxAppCode__['pages/index/index.wxss']=undefined;    
 __wxAppCode__['pages/index/index.wxml']=$gwx('./pages/index/index.wxml');
 
 ;var __pageFrameEndTime__ = Date.now();

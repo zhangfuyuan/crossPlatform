@@ -8,13 +8,17 @@
 				<image class="app-img" 
 							 mode="widthFix" 
 							 :src="app.appIcon || '/static/logo.png'"
-							 @error="imageError"></image>
+							 @error="imageError($event, index)"></image>
 				<text class="app-txt">{{app.appName}}</text>
 		</view>
 	</view>
 </template>
 
 <script>
+	import {
+		keyHandle
+	} from '@/common/util.js';
+	
 	export default {
     data() {
         return {
@@ -70,8 +74,8 @@
 							let iconFile = bitmapDrawable ? '/static/icons/'+appName+'.png' : '';
 						
 							if (bitmapDrawable != null) {
-								//let file = plus.android.newObject('java.io.File', plus.io.convertLocalFileSystemURL(iconFile));
-								let file = plus.android.newObject('java.io.File', '/storage/emulated/0/Android/data/com.xbh.lanucher/apps/__UNI__B2AB656/www'+iconFile);
+								let file = plus.android.newObject('java.io.File', plus.io.convertLocalFileSystemURL(iconFile));
+								//let file = plus.android.newObject('java.io.File', '/storage/emulated/0/Android/data/com.xbh.lanucher/apps/__UNI__B2AB656/www'+iconFile);
 								
 								if(!plus.android.invoke(file, 'exists')){
 									try{

@@ -1,5 +1,5 @@
 
-.appList-wrap.data-v-538ee0e6 {
+.appList-wrap.data-v-20a7e95e {
 	width: 750rpx;
 	height: 100vh;
 	display: -webkit-box;
@@ -23,7 +23,7 @@
 	    -ms-flex-direction: row;
 	        flex-direction: row;
 }
-.app.data-v-538ee0e6 {
+.app.data-v-20a7e95e {
 	width: 200rpx;
 	display: -webkit-box;
 	display: -webkit-flex;
@@ -43,11 +43,11 @@
 	    -ms-flex-align: center;
 	        align-items: center;
 }
-.app-img.data-v-538ee0e6 {
+.app-img.data-v-20a7e95e {
 	width: 48px; 
 	height: 48px;
 }
-.app-txt.data-v-538ee0e6 {
+.app-txt.data-v-20a7e95e {
 	color: #FFFFFF;
 	font-size: 16px;
 }

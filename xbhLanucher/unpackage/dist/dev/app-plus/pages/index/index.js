@@ -83,15 +83,203 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue?entry");
+/******/ 	return __webpack_require__(__webpack_require__.s = "../../../../work/xbhLanucher/pages/index/index.nvue?entry");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue?entry":
-/*!**************************************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/pages/index/index.nvue?entry ***!
-  \**************************************************************************/
+/***/ "../../../../work/xbhLanucher/common/util.js":
+/*!********************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/common/util.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.friendlyDate = friendlyDate;exports.getIp = getIp;exports.keyHandle = keyHandle;exports.Mac = void 0;function friendlyDate(timestamp) {
+  var formats = {
+    'year': '%n% 年前',
+    'month': '%n% 月前',
+    'day': '%n% 天前',
+    'hour': '%n% 小时前',
+    'minute': '%n% 分钟前',
+    'second': '%n% 秒前' };
+
+
+  var now = Date.now();
+  var seconds = Math.floor((now - timestamp) / 1000);
+  var minutes = Math.floor(seconds / 60);
+  var hours = Math.floor(minutes / 60);
+  var days = Math.floor(hours / 24);
+  var months = Math.floor(days / 30);
+  var years = Math.floor(months / 12);
+
+  var diffType = '';
+  var diffValue = 0;
+  if (years > 0) {
+    diffType = 'year';
+    diffValue = years;
+  } else {
+    if (months > 0) {
+      diffType = 'month';
+      diffValue = months;
+    } else {
+      if (days > 0) {
+        diffType = 'day';
+        diffValue = days;
+      } else {
+        if (hours > 0) {
+          diffType = 'hour';
+          diffValue = hours;
+        } else {
+          if (minutes > 0) {
+            diffType = 'minute';
+            diffValue = minutes;
+          } else {
+            diffType = 'second';
+            diffValue = seconds === 0 ? seconds = 1 : seconds;
+          }
+        }
+      }
+    }
+  }
+  return formats[diffType].replace('%n%', diffValue);
+}
+
+var Mac = {
+  address: function address() {
+    var Build = plus.android.importClass('android.os.Build');
+    if (Build.VERSION.SDK_INT < 23) //android 6.0以下版本
+      {
+        return this.WifiInfoMac();
+      } else if (Build.VERSION.SDK_INT == 23) //android 6.0
+      {
+        return this.ReaderMac();
+      } else {
+      return this.NetworkMac();
+    }
+  },
+  WifiInfoMac: function WifiInfoMac() {
+    var Context = plus.android.importClass("android.content.Context");
+    var WifiManager = plus.android.importClass("android.net.wifi.WifiManager");
+    var wifiManager = plus.android.runtimeMainActivity().getSystemService(Context.WIFI_SERVICE);
+    var WifiInfo = plus.android.importClass("android.net.wifi.WifiInfo");
+    var wifiInfo = wifiManager.getConnectionInfo();
+    return wifiInfo.getMacAddress();
+  },
+  ReaderMac: function ReaderMac() {
+    try {
+      var BufferedReader = plus.android.importClass("java.io.BufferedReader");
+      var FileReader = plus.android.importClass("java.io.FileReader");
+      var file = new FileReader("/sys/class/net/wlan0/address");
+      var reader = new BufferedReader(file, 256);
+      var address = reader.readLine();
+      reader.close();
+      return address;
+    } catch (error) {
+      this.NetworkMac();
+      return "02:00:00:00:00:00";
+    }
+  },
+  NetworkMac: function NetworkMac() {
+    var NetworkInterface = plus.android.importClass("java.net.NetworkInterface");
+    var networkInterface = NetworkInterface.getByName("eth1");
+    if (networkInterface == null) {
+      networkInterface = NetworkInterface.getByName("wlan0");
+    }
+    if (networkInterface == null) {
+      this.isWifi();
+      return "02:00:00:00:00:00";
+    }
+    var mac = networkInterface.getHardwareAddress();
+    var macArr = [];
+    for (var i in mac) {
+      macArr.push(this.format(mac[i]));
+    }
+    return macArr.join(":");
+  },
+  format: function format(mac) {
+    if (parseInt(mac) >= 0) {
+      var numbder = parseInt(mac).toString(16);
+      var num = numbder.length == 1 ? "0" + numbder : numbder;
+      return num;
+    } else {
+      var numbder = parseInt(256 - Math.abs(mac)).toString(16);
+      var num = numbder.length == 1 ? "0" + numbder : numbder;
+      return num;
+    }
+  },
+  isWifi: function isWifi() {
+    if (plus.networkinfo.getCurrentType() == plus.networkinfo.CONNECTION_WIFI) {
+      return "02:00:00:00:00:00";
+    } else {
+      plus.nativeUI.confirm("需要打开WiFi才能获取到MAC地址,是否去打开WiFi", function (event) {
+        if (event.index == 0) {
+          var main = plus.android.runtimeMainActivity();
+          var Intent = plus.android.importClass('android.content.Intent');
+          var intent = new Intent();
+          intent.setClassName("com.android.settings", "com.android.settings.wifi.WifiSettings");
+          main.startActivity(intent);
+        }
+      });
+    }
+  } };exports.Mac = Mac;
+
+
+function getIp() {
+  var ip = "127.0.0.1";
+  if (plus.os.name == "Android") {
+    //WifiManager  
+    var Context = plus.android.importClass("android.content.Context");
+    var WifiManager = plus.android.importClass("android.net.wifi.WifiManager");
+    var wifiManager = plus.android.runtimeMainActivity().getSystemService(Context.WIFI_SERVICE);
+    var WifiInfo = plus.android.importClass("android.net.wifi.WifiInfo");
+    var wifiInfo = wifiManager.getConnectionInfo();
+    ip = intToIp(wifiInfo.getIpAddress());
+  } else if (plus.os.name == "iOS") {
+
+  }
+  return ip;
+}
+
+function intToIp(i) {
+  return (i & 0xFF) + "." + (i >> 8 & 0xFF) + "." + (i >> 16 & 0xFF) + "." + (i >> 24 & 0xFF);
+}
+
+function keyHandle(keyCode, curIndex, curLinage, minIndex, maxIndex) {
+  var code = keyCode;
+  var index = +curIndex;
+  var linage = +curLinage;
+  var min = +minIndex;
+  var max = +maxIndex;
+
+  switch (code) {
+    case '19': // 上
+      index = index - linage < min ? index : index - linage;
+      break;
+    case '20': // 下
+      index = index + linage > max ? index : index + linage;
+      break;
+    case '21': // 左
+      index = index - 1 < min ? min : index - 1;
+      break;
+    case '22': // 右
+      index = index + 1 > max ? max : index + 1;
+      console.log(index, " at common\\util.js:170");
+      break;
+    default:
+      break;}
+
+
+  return index;
+}
+
+/***/ }),
+
+/***/ "../../../../work/xbhLanucher/pages/index/index.nvue?entry":
+/*!**********************************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/pages/index/index.nvue?entry ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -99,14 +287,14 @@ var __vue_exports__, __vue_options__
 var __vue_styles__ = []
 
 /* styles */
-__vue_styles__.push(__webpack_require__(/*! !../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/style-loader!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/style-rewriter?id=data-v-c771641c!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=styles&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue")
+__vue_styles__.push(__webpack_require__(/*! !../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/style-loader!../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/style-rewriter?id=data-v-1c88b17b!../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=styles&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!../../../../work/xbhLanucher/pages/index/index.nvue")
 )
 
 /* script */
-__vue_exports__ = __webpack_require__(/*! !../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/script-loader!babel-loader!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=script&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib/index.js!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue")
+__vue_exports__ = __webpack_require__(/*! !../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/script-loader!babel-loader!../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=script&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib/index.js!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!../../../../work/xbhLanucher/pages/index/index.nvue")
 
 /* template */
-var __vue_template__ = __webpack_require__(/*! !../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/template-compiler?id=data-v-c771641c!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=template&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue")
+var __vue_template__ = __webpack_require__(/*! !../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/template-compiler?id=data-v-1c88b17b!../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/weex-vue-loader/lib/selector?type=template&index=0!./index.nvue */ "./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!../../../../work/xbhLanucher/pages/index/index.nvue")
 __vue_options__ = __vue_exports__ = __vue_exports__ || {}
 if (
   typeof __vue_exports__.default === "object" ||
@@ -118,10 +306,10 @@ __vue_options__ = __vue_exports__ = __vue_exports__.default
 if (typeof __vue_options__ === "function") {
   __vue_options__ = __vue_options__.options
 }
-__vue_options__.__file = "E:\\web\\crossPlatform\\work\\xbhLanucher\\pages\\index\\index.nvue"
+__vue_options__.__file = "E:\\crossPlatform\\work\\xbhLanucher\\pages\\index\\index.nvue"
 __vue_options__.render = __vue_template__.render
 __vue_options__.staticRenderFns = __vue_template__.staticRenderFns
-__vue_options__._scopeId = "data-v-c771641c"
+__vue_options__._scopeId = "data-v-1c88b17b"
 __vue_options__.style = __vue_options__.style || {}
 __vue_styles__.forEach(function (module) {
   for (var name in module) {
@@ -704,95 +892,100 @@ var uni$1 = uni;
 
 /***/ }),
 
-/***/ "./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib/index.js!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue":
-/*!***************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!E:/web/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
-  \***************************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib/index.js!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!../../../../work/xbhLanucher/pages/index/index.nvue":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/weex-vue-loader/lib/script-loader.js!./node_modules/babel-loader/lib!./node_modules/weex-vue-loader/lib/selector.js?type=script&index=0!E:/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
+  \***********************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
 
-var modal = weex.requireModule('modal');
-var globalEvent = weex.requireModule('globalEvent');var _default =
 
-{
-  data: function data() {
-    return {
-      dWidth: WXEnvironment.deviceWidth,
-      dHeight: WXEnvironment.deviceHeight,
-      isLandscape: +WXEnvironment.deviceWidth > +WXEnvironment.deviceHeight, //是否横屏（默认竖屏）
-      shortcutList: [
-      {
-        label: 'information',
-        name: '信息发布', // 小百合播放器包名：com.harison.adver
-        url: '/static/images/information.png',
-        activeUrl: '/static/images/information_on.png',
-        package: ['com.harison.adver'] },
-      {
-        label: 'file_manager',
-        name: '文件管理', // 资源管理器包名：3288 -> com.android.rk
-        url: '/static/images/file_manager.png',
-        activeUrl: '/static/images/file_manager_on.png',
-        package: ['com.android.rk'] },
-      {
-        label: 'time_switch',
-        name: '定时开关', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
-        url: '/static/images/time_switch.png',
-        activeUrl: '/static/images/time_switch_on.png',
-        package: ['com.lango.system.settings', 'com.android.settings'] },
-      {
-        label: 'network_settings',
-        name: '网络设置', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
-        url: '/static/images/network_settings.png',
-        activeUrl: '/static/images/network_settings_on.png',
-        package: ['com.lango.system.settings', 'com.android.settings'] },
-      {
-        label: 'browser',
-        name: '浏览器', // 浏览器包名：com.android.browser
-        url: '/static/images/browser.png',
-        activeUrl: '/static/images/browser_on.png',
-        package: ['com.android.browser'] },
-      {
-        label: 'application',
-        name: '应用列表',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _util = __webpack_require__(/*! @/common/util.js */ "../../../../work/xbhLanucher/common/util.js"); //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var modal = weex.requireModule('modal');var globalEvent = weex.requireModule('globalEvent');var stream = weex.requireModule('stream') || {};var navigator = weex.requireModule('navigator');var _default = { data: function data() {return { dWidth: WXEnvironment.deviceWidth, dHeight: WXEnvironment.deviceHeight, isLandscape: +WXEnvironment.deviceWidth > +WXEnvironment.deviceHeight, //是否横屏（默认竖屏）
+      shortcutList: [{ label: 'information', name: '信息发布', // 小百合播放器包名：com.harison.adver
+        url: '/static/images/information.png', activeUrl: '/static/images/information_on.png', package: ['com.harison.adver'] }, { label: 'file_manager', name: '文件管理', // 资源管理器包名：3288 -> com.android.rk
+        url: '/static/images/file_manager.png', activeUrl: '/static/images/file_manager_on.png', package: ['com.android.rk'] }, { label: 'time_switch', name: '定时开关', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
+        url: '/static/images/time_switch.png', activeUrl: '/static/images/time_switch_on.png', package: ['com.lango.system.settings', 'com.android.settings'] }, { label: 'network_settings', name: '网络设置', // 原生设置 | 系统设置包名：com.android.settings | com.lango.system.settings
+        url: '/static/images/network_settings.png', activeUrl: '/static/images/network_settings_on.png', package: ['com.lango.system.settings', 'com.android.settings'] }, { label: 'browser', name: '浏览器', // 浏览器包名：com.android.browser
+        url: '/static/images/browser.png', activeUrl: '/static/images/browser_on.png', package: ['com.android.browser'] }, { label: 'application', name: '应用列表',
         url: '/static/images/application.png',
         activeUrl: '/static/images/application_on.png' }],
 
@@ -806,12 +999,19 @@ var globalEvent = weex.requireModule('globalEvent');var _default =
   },
   created: function created() {var _this = this;
     globalEvent.addEventListener("plusMessage", function (e) {
-      console.log(e.data.module, " at pages\\index\\index.nvue:95");
+      console.log(e.data.module, " at pages\\index\\index.nvue:100");
 
       if (e.data.res) {
         if (e.data.module === 'MAC&IP') {
           _this.netId = e.data.res.mac;
           _this.netIp = e.data.res.ip;
+        } else if (e.data.module === 'keydown') {
+          if (e.data.res === '23') {// 确定
+            _this.launchApp(_this.shortcutList[_this.activeIndex], _this.activeIndex);
+          } else {
+            _this.activeIndex = (0, _util.keyHandle)(e.data.res, _this.activeIndex, _this.isLandscape ? 3 : 2, 0, 5);
+            console.log(_this.activeIndex, " at pages\\index\\index.nvue:111");
+          }
         }
       }
     });
@@ -892,10 +1092,10 @@ var globalEvent = weex.requireModule('globalEvent');var _default =
 
 /***/ }),
 
-/***/ "./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue":
-/*!******************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!E:/web/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
-  \******************************************************************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!../../../../work/xbhLanucher/pages/index/index.nvue":
+/*!**************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/weex-vue-loader/lib/style-loader.js!./node_modules/weex-vue-loader/lib/style-rewriter.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=styles&index=0!E:/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
+  \**************************************************************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -1056,10 +1256,10 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!../../../../crossPlatform/work/xbhLanucher/pages/index/index.nvue":
-/*!********************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-c771641c!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!E:/web/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
-  \********************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!../../../../work/xbhLanucher/pages/index/index.nvue":
+/*!****************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/weex-vue-loader/lib/template-compiler.js?id=data-v-1c88b17b!./node_modules/weex-vue-loader/lib/selector.js?type=template&index=0!E:/crossPlatform/work/xbhLanucher/pages/index/index.nvue ***!
+  \****************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 

@@ -13,6 +13,12 @@
 			return {
 			}
 		},
+		created() {
+			// 调启外部应用
+			uni.postMessage({
+				module: 'setBackgroundColor'
+			});
+		},
 		methods: {
 			launchApp() {
 				if (typeof uni !== 'undefined') {

@@ -1,14 +1,14 @@
 (global["webpackJsonp"] = global["webpackJsonp"] || []).push([["common/vendor"],{
 
-/***/ "../../../../crossPlatform/work/xbhLanucher/common/util.js":
-/*!************************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/common/util.js ***!
-  \************************************************************/
+/***/ "../../../../work/xbhLanucher/common/util.js":
+/*!********************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/common/util.js ***!
+  \********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.friendlyDate = friendlyDate;exports.getIp = getIp;exports.Mac = void 0;function friendlyDate(timestamp) {
+Object.defineProperty(exports, "__esModule", { value: true });exports.friendlyDate = friendlyDate;exports.getIp = getIp;exports.keyHandle = keyHandle;exports.Mac = void 0;function friendlyDate(timestamp) {
   var formats = {
     'year': '%n% 年前',
     'month': '%n% 月前',
@@ -158,19 +158,47 @@ function intToIp(i) {
   return (i & 0xFF) + "." + (i >> 8 & 0xFF) + "." + (i >> 16 & 0xFF) + "." + (i >> 24 & 0xFF);
 }
 
+function keyHandle(keyCode, curIndex, curLinage, minIndex, maxIndex) {
+  var code = keyCode;
+  var index = +curIndex;
+  var linage = +curLinage;
+  var min = +minIndex;
+  var max = +maxIndex;
+
+  switch (code) {
+    case '19': // 上
+      index = index - linage < min ? index : index - linage;
+      break;
+    case '20': // 下
+      index = index + linage > max ? index : index + linage;
+      break;
+    case '21': // 左
+      index = index - 1 < min ? min : index - 1;
+      break;
+    case '22': // 右
+      index = index + 1 > max ? max : index + 1;
+      console.log(index, " at common\\util.js:170");
+      break;
+    default:
+      break;}
+
+
+  return index;
+}
+
 /***/ }),
 
-/***/ "../../../../crossPlatform/work/xbhLanucher/main.js":
-/*!*****************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/main.js ***!
-  \*****************************************************/
+/***/ "../../../../work/xbhLanucher/main.js":
+/*!*************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/main.js ***!
+  \*************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(createApp) {__webpack_require__(/*! uni-pages */ "../../../../crossPlatform/work/xbhLanucher/pages.json");
+/* WEBPACK VAR INJECTION */(function(createApp) {__webpack_require__(/*! uni-pages */ "../../../../work/xbhLanucher/pages.json");
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ "./node_modules/@dcloudio/vue-cli-plugin-uni/packages/mp-vue/dist/mp.runtime.esm.js"));
-var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ "../../../../crossPlatform/work/xbhLanucher/App.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ "../../../../work/xbhLanucher/App.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
 _vue.default.config.productionTip = false;
 
@@ -184,44 +212,44 @@ createApp(app).$mount();
 
 /***/ }),
 
-/***/ "../../../../crossPlatform/work/xbhLanucher/main.js?{\"page\":\"pages%2FappList%2FappList\"}":
-/*!******************************************************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/main.js?{"page":"pages%2FappList%2FappList"} ***!
-  \******************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(createPage) {__webpack_require__(/*! uni-pages */ "../../../../crossPlatform/work/xbhLanucher/pages.json");
-
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ "./node_modules/@dcloudio/vue-cli-plugin-uni/packages/mp-vue/dist/mp.runtime.esm.js"));
-var _appList = _interopRequireDefault(__webpack_require__(/*! ./pages/appList/appList.vue */ "../../../../crossPlatform/work/xbhLanucher/pages/appList/appList.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
-createPage(_appList.default);
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-app-plus/dist/index.js */ "./node_modules/@dcloudio/uni-app-plus/dist/index.js")["createPage"]))
-
-/***/ }),
-
-/***/ "../../../../crossPlatform/work/xbhLanucher/main.js?{\"page\":\"pages%2Fblock%2Fblock\"}":
+/***/ "../../../../work/xbhLanucher/main.js?{\"page\":\"pages%2FappList%2FappList\"}":
 /*!**************************************************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/main.js?{"page":"pages%2Fblock%2Fblock"} ***!
+  !*** E:/crossPlatform/work/xbhLanucher/main.js?{"page":"pages%2FappList%2FappList"} ***!
   \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(createPage) {__webpack_require__(/*! uni-pages */ "../../../../crossPlatform/work/xbhLanucher/pages.json");
+/* WEBPACK VAR INJECTION */(function(createPage) {__webpack_require__(/*! uni-pages */ "../../../../work/xbhLanucher/pages.json");
 
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ "./node_modules/@dcloudio/vue-cli-plugin-uni/packages/mp-vue/dist/mp.runtime.esm.js"));
-var _block = _interopRequireDefault(__webpack_require__(/*! ./pages/block/block.vue */ "../../../../crossPlatform/work/xbhLanucher/pages/block/block.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _appList = _interopRequireDefault(__webpack_require__(/*! ./pages/appList/appList.vue */ "../../../../work/xbhLanucher/pages/appList/appList.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+createPage(_appList.default);
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-app-plus/dist/index.js */ "./node_modules/@dcloudio/uni-app-plus/dist/index.js")["createPage"]))
+
+/***/ }),
+
+/***/ "../../../../work/xbhLanucher/main.js?{\"page\":\"pages%2Fblock%2Fblock\"}":
+/*!**********************************************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/main.js?{"page":"pages%2Fblock%2Fblock"} ***!
+  \**********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(createPage) {__webpack_require__(/*! uni-pages */ "../../../../work/xbhLanucher/pages.json");
+
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ "./node_modules/@dcloudio/vue-cli-plugin-uni/packages/mp-vue/dist/mp.runtime.esm.js"));
+var _block = _interopRequireDefault(__webpack_require__(/*! ./pages/block/block.vue */ "../../../../work/xbhLanucher/pages/block/block.vue"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 createPage(_block.default);
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-app-plus/dist/index.js */ "./node_modules/@dcloudio/uni-app-plus/dist/index.js")["createPage"]))
 
 /***/ }),
 
-/***/ "../../../../crossPlatform/work/xbhLanucher/pages.json":
-/*!********************************************************!*\
-  !*** E:/web/crossPlatform/work/xbhLanucher/pages.json ***!
-  \********************************************************/
+/***/ "../../../../work/xbhLanucher/pages.json":
+/*!****************************************************!*\
+  !*** E:/crossPlatform/work/xbhLanucher/pages.json ***!
+  \****************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

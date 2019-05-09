@@ -38,6 +38,11 @@
 <script>
 	var modal = weex.requireModule('modal');
 	const globalEvent = weex.requireModule('globalEvent');
+	const stream = weex.requireModule('stream') || {};
+	var navigator = weex.requireModule('navigator')
+	import {
+		keyHandle
+	} from '@/common/util.js';
 	
 	export default {
 		data() {
@@ -98,6 +103,13 @@
 						if (e.data.module === 'MAC&IP') {
 							this.netId = e.data.res.mac;
 							this.netIp = e.data.res.ip;
+						} else if (e.data.module === 'keydown') {
+							if (e.data.res === '23') { // 确定
+								this.launchApp(this.shortcutList[this.activeIndex], this.activeIndex);
+							} else {
+								this.activeIndex = keyHandle(e.data.res, this.activeIndex, this.isLandscape?3:2, 0, 5);
+								console.log(this.activeIndex);
+							}
 						}
 			    }
 			});

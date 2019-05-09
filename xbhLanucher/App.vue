@@ -7,6 +7,25 @@
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			
+			// 监听键松开事件
+			plus.key.addEventListener("keydown",function(e){
+				let keyCode = e.keyCode + ''; // 转成字符串
+				console.log("keydown: "+keyCode);
+				
+				if (keyCode === '4') { // 返回：4
+					uni.navigateBack();
+				} else { // 上：19 下：20 左：21 右：22 确定：23 
+					var pages = getCurrentPages();
+					var page = pages[pages.length - 1];
+					var currentWebview = page.$getAppWebview();
+					
+					plus.webview.postMessageToUniNView({
+						module: 'keydown',
+						res: keyCode
+					}, currentWebview.id);
+				}
+			}, false);
 		},
 		onShow: function() {
 			console.log('App Show')
@@ -15,11 +34,11 @@
 			console.log('App Hide')
 		},
 		onUniNViewMessage: function(e) {
-            console.log("App.vue收到数据:" + JSON.stringify(e.data));
-			
-            var pages = getCurrentPages();
-            var page = pages[pages.length - 1];
-            var currentWebview = page.$getAppWebview();
+			console.log("App.vue收到数据:" + JSON.stringify(e.data));
+
+			var pages = getCurrentPages();
+			var page = pages[pages.length - 1];
+			var currentWebview = page.$getAppWebview();
 			var plusReady = function(callback){  
 					 if (typeof plus !== 'undefined') {  
 						callback();  
@@ -176,6 +195,20 @@
 							res: resList
 						}, currentWebview.id);
 						
+					} else if (e.data.module === 'setBackgroundColor') {
+						
+						let Color = plus.android.importClass('android.graphics.Color');
+						let MainActivity = plus.android.runtimeMainActivity();
+						let Window = MainActivity.getWindow();
+						let DecorView = plus.android.invoke(Window, 'getDecorView');
+						let Thread = plus.ios.importClass("java.lang.Thread");
+						let Runnable = plus.android.implements("java.lang.Runnable", {
+							"run": function() {
+								plus.android.invoke(DecorView, 'setBackgroundColor', Color.parseColor('#2C2C2C'));
+							}  
+						});
+						MainActivity.runOnUiThread(Runnable);
+						
 					} else {
 						
 						uni.showToast({
@@ -193,7 +226,7 @@
 					position: 'top'
 				});
 			}
-        }
+    }
 	}
 </script>
 

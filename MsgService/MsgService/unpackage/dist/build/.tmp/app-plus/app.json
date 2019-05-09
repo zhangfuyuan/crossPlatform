@@ -4,16 +4,14 @@
   ],
   "subPackages": [],
   "window": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "uni-app",
-    "navigationBarBackgroundColor": "#F8F8F8",
-    "backgroundColor": "#F8F8F8"
+    "navigationStyle": "custom",
+    "animationType": "none"
   },
   "splashscreen": {
-    "alwaysShowBeforeRender": true,
-    "autoclose": false
+    "alwaysShowBeforeRender": false,
+    "autoclose": true
   },
-  "appname": "消息服务",
-  "compilerVersion": "1.9.3",
+  "appname": "短信服务",
+  "compilerVersion": "1.9.4",
   "usingComponents": {}
 }

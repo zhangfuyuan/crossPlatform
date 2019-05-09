@@ -1093,10 +1093,10 @@ return root;
 
 
 
-__wxAppCode__['app.json']={"pages":["pages/index/index"],"subPackages":[],"window":{"navigationBarTextStyle":"black","navigationBarTitleText":"uni-app","navigationBarBackgroundColor":"#F8F8F8","backgroundColor":"#F8F8F8"},"splashscreen":{"alwaysShowBeforeRender":true,"autoclose":false},"appname":"消息服务","compilerVersion":"1.9.3","usingComponents":{}};
+__wxAppCode__['app.json']={"pages":["pages/index/index"],"subPackages":[],"window":{"navigationStyle":"custom","animationType":"none"},"splashscreen":{"alwaysShowBeforeRender":false,"autoclose":true},"appname":"短信服务","compilerVersion":"1.9.4","usingComponents":{}};
 __wxAppCode__['app.wxml']=$gwx('./app.wxml');
 
-__wxAppCode__['pages/index/index.json']={"navigationBarTitleText":"uni-app","usingComponents":{}};
+__wxAppCode__['pages/index/index.json']={"usingComponents":{}};
 __wxAppCode__['pages/index/index.wxml']=$gwx('./pages/index/index.wxml');
 
 
@@ -1199,7 +1199,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
     //plusReady封装，若使用mui，可直接使用mui.plusReady()方法；  
     var plusReady = function plusReady(callback) {
-      if (plus) {
+      if (typeof plus !== 'undefined') {
         callback();
       } else {
         document.addEventListener("plusready", function () {
@@ -1220,8 +1220,6 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
         var version = plus.runtime.innerVersion.split('.');
         isOlderVersion = parseInt(version[version.length - 1]) < 22298;
         main = plus.android.runtimeMainActivity();
-        main.moveTaskToBack(false);
-
         var Intent = plus.android.importClass('android.content.Intent');
         var IntentFilter = plus.android.importClass('android.content.IntentFilter');
         var SmsMessage = plus.android.importClass('android.telephony.SmsMessage');
@@ -1260,6 +1258,9 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
       if (!isInit) {
         isInit = isRegistered = true;
         plusReady(function () {
+          // 手动关闭启动界面
+          plus.navigator.closeSplashscreen();
+
           init(function () {
             setTimeout(function () {
               //                  console.log('registerReceiver');  
@@ -1310,11 +1311,23 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     var codeRegex = /[0-9]{6}/g;
 
     var handleSMS = function handleSMS(msgs) {
-      if (msgs.length > 0) {
-        var msgBody = msgs[msgs.length - 1].getDisplayMessageBody();
+      console.log(msgs.length, " at App.vue:129");
 
-        console.log(msgBody, " at App.vue:131");
-        plus.nativeUI.toast(msgBody);
+      if (msgs.length > 0) {
+        // getMessageBody() 得到文本信息的实体部分
+        // getDisplayOriginatingAddress() | getOriginatingAddress() 得到邮件网关发信人地址信息
+        // getServiceCenterAddress() 传递这条信息的信息服务中心地址（即 +86***********）
+        var msgBody = msgs[msgs.length - 1].getDisplayMessageBody(); // 得到邮件网关消息显示部分的正文部分
+        var msgAddress = msgs[msgs.length - 1].getServiceCenterAddress(); // 传递这条信息的信息服务中心地址
+        console.log(msgBody + ' -- by ' + msgAddress, " at App.vue:137");
+
+        if (~msgAddress.indexOf('+86')) {// TODO 校验短信地址是否合法
+          console.log('====plus.storage.getLength==== ', plus.storage.getLength(), " at App.vue:140");
+
+          sendBroadcast(msgBody);
+          plus.storage.setItem('xbhMsg', msgBody);
+          plus.nativeUI.toast(msgBody + ' -- by ' + msgAddress);
+        }
       }
 
       /*for (var i = 0, len = msgs.length; i < len; i++) {  
@@ -1343,15 +1356,52 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
     };
 
-    //登录页面注册短信监听事件  
-    register(handleSMS);
+    // 获取缓存中的短信
+    var oldXbhMsg = plus.storage.getItem('xbhMsg');
+    console.log('======plus.storage.getItem======= ', oldXbhMsg, " at App.vue:176");
+
+    // 给小百合播放器发送广播
+    var sendBroadcast = function sendBroadcast(xbhMsg) {
+      if (xbhMsg && plus.runtime.isApplicationExist({ pname: 'com.harison.adver' })) {
+        var Intent = plus.android.importClass('android.content.Intent');
+        var intent = new Intent('xbh.intent.action.printer.PRINT_SERVICE_START');
+
+        intent.putExtra('type', 'text');
+        intent.putExtra('key', 'dayin'); // TODO 对应文本控件id -> weather
+        intent.putExtra('value', xbhMsg);
+        main.sendBroadcast(intent);
+      } else {
+        plus.nativeUI.toast('短信或小百合播放器不存在！');
+      }
+    };
+
+    /* ====================================================== 以上声明，以下调用 ====================================================== */
+
+    try {
+      // 第一件事：登录页面注册短信监听事件  
+      register(handleSMS);
+
+      // 第二件事：首次启动判断缓存中是否已有短信，有则发送广播
+      if (oldXbhMsg) {
+        setTimeout(function () {
+          sendBroadcast(oldXbhMsg);
+          plus.nativeUI.toast(oldXbhMsg);
+        }, 5000);
+      }
+    } catch (e) {
+      plus.nativeUI.toast(typeof e.message === 'string' ? e.message : e);
+    }
 
   },
   onShow: function onShow() {
-    console.log('App Show', " at App.vue:166");
+    console.log('App Show', " at App.vue:212");
+
+    // 第三件事：启动后直接在后台运行
+    var main = plus.android.runtimeMainActivity();
+    main.moveTaskToBack(false);
   },
   onHide: function onHide() {
-    console.log('App Hide', " at App.vue:169");
+    console.log('App Hide', " at App.vue:219");
   } };exports.default = _default;
 
 /***/ }),
@@ -8401,6 +8451,7 @@ var LIFECYCLE_HOOKS$1 = [
     'onShow',
     'onHide',
     'onUniNViewMessage',
+    'onError',
     //Page
     'onLoad',
     // 'onShow',
@@ -8642,9 +8693,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _index_vue_vue_type_template_id_052b0c0c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index.vue?vue&type=template&id=052b0c0c& */ "../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=template&id=052b0c0c&");
 /* harmony import */ var _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./index.vue?vue&type=script&lang=js& */ "../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=script&lang=js&");
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.vue?vue&type=style&index=0&lang=css& */ "../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css&");
-/* harmony import */ var _tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
+/* harmony import */ var _tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -8652,7 +8701,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+var component = Object(_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
   _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _index_vue_vue_type_template_id_052b0c0c___WEBPACK_IMPORTED_MODULE_0__["render"],
   _index_vue_vue_type_template_id_052b0c0c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -8683,22 +8732,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tools_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_12_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tools_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_12_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _tools_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_12_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _tools_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_12_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_tools_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_12_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
-
-/***/ }),
-
-/***/ "../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css&":
-/*!**********************************************************************************************************!*\
-  !*** E:/crossPlatform/work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css& ***!
-  \**********************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/mini-css-extract-plugin/dist/loader.js??ref--6-oneOf-1-0!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--6-oneOf-1-1!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/css-loader??ref--6-oneOf-1-2!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/postcss-loader/src??ref--6-oneOf-1-3!../../../../../tools/HBuilderX/plugins/uniapp-cli/node_modules/vue-loader/lib??vue-loader-options!./index.vue?vue&type=style&index=0&lang=css& */ "./node_modules/mini-css-extract-plugin/dist/loader.js?!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader/index.js?!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css&");
-/* harmony import */ var _tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
- /* harmony default export */ __webpack_exports__["default"] = (_tools_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_6_oneOf_1_0_tools_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_6_oneOf_1_1_tools_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_index_js_ref_6_oneOf_1_2_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_loaders_stylePostLoader_js_tools_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_tools_HBuilderX_plugins_uniapp_cli_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
@@ -8733,32 +8766,16 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 //
 //
 //
-//
-//
-//
-//
 var _default =
 {
   data: function data() {
-    return {
-      title: 'Hello' };
+    return {};
 
   },
   onLoad: function onLoad() {
 
   },
   methods: {} };exports.default = _default;
-
-/***/ }),
-
-/***/ "./node_modules/mini-css-extract-plugin/dist/loader.js?!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader/index.js?!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!../../../../work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css&":
-/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--6-oneOf-1-0!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--6-oneOf-1-1!./node_modules/css-loader??ref--6-oneOf-1-2!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-oneOf-1-3!./node_modules/vue-loader/lib??vue-loader-options!E:/crossPlatform/work/MsgService/MsgService/pages/index/index.vue?vue&type=style&index=0&lang=css& ***!
-  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
 
 /***/ }),
 

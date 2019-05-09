@@ -148,8 +148,37 @@ function intToIp(i)  {
 　　return (i & 0xFF) + "." + ((i >> 8 ) & 0xFF) + "." + ((i >> 16 ) & 0xFF) +"."+((i >> 24 ) & 0xFF );  
 }   
 
+function keyHandle(keyCode, curIndex, curLinage, minIndex, maxIndex) {
+	let code = keyCode;
+	let index = +curIndex;
+	let linage = +curLinage;
+	let min = +minIndex;
+	let max = +maxIndex;
+	
+	switch (code){
+		case '19': // 上
+			index = index-linage<min ? index : index-linage;
+			break;
+		case '20': // 下
+			index = index+linage>max ? index : index+linage;
+			break;
+		case '21': // 左
+			index = index-1<min ? min : index-1;
+			break;
+		case '22': // 右
+			index = index+1>max ? max : index+1;
+			console.log(index);
+			break;
+		default:
+			break;
+	}
+	
+	return index;
+}
+
 export {
 	friendlyDate,
 	Mac,
-	getIp
+	getIp,
+	keyHandle
 }

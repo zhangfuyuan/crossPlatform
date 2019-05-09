@@ -6874,6 +6874,7 @@ var LIFECYCLE_HOOKS$1 = [
     'onShow',
     'onHide',
     'onUniNViewMessage',
+    'onError',
     //Page
     'onLoad',
     // 'onShow',

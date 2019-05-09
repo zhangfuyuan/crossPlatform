@@ -95,7 +95,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
     //plusReady封装，若使用mui，可直接使用mui.plusReady()方法；  
     var plusReady = function plusReady(callback) {
-      if (plus) {
+      if (typeof plus !== 'undefined') {
         callback();
       } else {
         document.addEventListener("plusready", function () {
@@ -116,8 +116,6 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
         var version = plus.runtime.innerVersion.split('.');
         isOlderVersion = parseInt(version[version.length - 1]) < 22298;
         main = plus.android.runtimeMainActivity();
-        main.moveTaskToBack(false);
-
         var Intent = plus.android.importClass('android.content.Intent');
         var IntentFilter = plus.android.importClass('android.content.IntentFilter');
         var SmsMessage = plus.android.importClass('android.telephony.SmsMessage');
@@ -156,6 +154,9 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
       if (!isInit) {
         isInit = isRegistered = true;
         plusReady(function () {
+          // 手动关闭启动界面
+          plus.navigator.closeSplashscreen();
+
           init(function () {
             setTimeout(function () {
               //                  console.log('registerReceiver');  
@@ -206,11 +207,23 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     var codeRegex = /[0-9]{6}/g;
 
     var handleSMS = function handleSMS(msgs) {
-      if (msgs.length > 0) {
-        var msgBody = msgs[msgs.length - 1].getDisplayMessageBody();
+      console.log(msgs.length, " at App.vue:129");
 
-        console.log(msgBody, " at App.vue:131");
-        plus.nativeUI.toast(msgBody);
+      if (msgs.length > 0) {
+        // getMessageBody() 得到文本信息的实体部分
+        // getDisplayOriginatingAddress() | getOriginatingAddress() 得到邮件网关发信人地址信息
+        // getServiceCenterAddress() 传递这条信息的信息服务中心地址（即 +86***********）
+        var msgBody = msgs[msgs.length - 1].getDisplayMessageBody(); // 得到邮件网关消息显示部分的正文部分
+        var msgAddress = msgs[msgs.length - 1].getServiceCenterAddress(); // 传递这条信息的信息服务中心地址
+        console.log(msgBody + ' -- by ' + msgAddress, " at App.vue:137");
+
+        if (~msgAddress.indexOf('+86')) {// TODO 校验短信地址是否合法
+          console.log('====plus.storage.getLength==== ', plus.storage.getLength(), " at App.vue:140");
+
+          sendBroadcast(msgBody);
+          plus.storage.setItem('xbhMsg', msgBody);
+          plus.nativeUI.toast(msgBody + ' -- by ' + msgAddress);
+        }
       }
 
       /*for (var i = 0, len = msgs.length; i < len; i++) {  
@@ -239,15 +252,52 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
     };
 
-    //登录页面注册短信监听事件  
-    register(handleSMS);
+    // 获取缓存中的短信
+    var oldXbhMsg = plus.storage.getItem('xbhMsg');
+    console.log('======plus.storage.getItem======= ', oldXbhMsg, " at App.vue:176");
+
+    // 给小百合播放器发送广播
+    var sendBroadcast = function sendBroadcast(xbhMsg) {
+      if (xbhMsg && plus.runtime.isApplicationExist({ pname: 'com.harison.adver' })) {
+        var Intent = plus.android.importClass('android.content.Intent');
+        var intent = new Intent('xbh.intent.action.printer.PRINT_SERVICE_START');
+
+        intent.putExtra('type', 'text');
+        intent.putExtra('key', 'dayin'); // TODO 对应文本控件id -> weather
+        intent.putExtra('value', xbhMsg);
+        main.sendBroadcast(intent);
+      } else {
+        plus.nativeUI.toast('短信或小百合播放器不存在！');
+      }
+    };
+
+    /* ====================================================== 以上声明，以下调用 ====================================================== */
+
+    try {
+      // 第一件事：登录页面注册短信监听事件  
+      register(handleSMS);
+
+      // 第二件事：首次启动判断缓存中是否已有短信，有则发送广播
+      if (oldXbhMsg) {
+        setTimeout(function () {
+          sendBroadcast(oldXbhMsg);
+          plus.nativeUI.toast(oldXbhMsg);
+        }, 5000);
+      }
+    } catch (e) {
+      plus.nativeUI.toast(typeof e.message === 'string' ? e.message : e);
+    }
 
   },
   onShow: function onShow() {
-    console.log('App Show', " at App.vue:166");
+    console.log('App Show', " at App.vue:212");
+
+    // 第三件事：启动后直接在后台运行
+    var main = plus.android.runtimeMainActivity();
+    main.moveTaskToBack(false);
   },
   onHide: function onHide() {
-    console.log('App Hide', " at App.vue:169");
+    console.log('App Hide', " at App.vue:219");
   } };exports.default = _default;
 
 /***/ }),
