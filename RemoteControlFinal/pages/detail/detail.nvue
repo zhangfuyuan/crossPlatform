@@ -1,0 +1,37 @@
+<template>
+	<div class="infoPublishIndex-wrap">
+		<text class="network-txt">联网发布</text>
+		<text class="single-txt">单机发布</text>
+	</div>
+</template>
+
+<script>
+	export default {
+		
+	}
+</script>
+
+<style>
+	.infoPublishIndex-wrap {
+		width: 750px;
+		background-color: #2C2C2C;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+	.network-txt {
+		font-size: 16px;
+		color: #ffffff;
+		margin-right: 100px;
+	}
+	.single-txt {
+		font-size: 16px;
+		color: #ffffff;
+	}
+	.network-txt:active {
+		color: #3babd0;
+	}
+	.network-txt:active {
+		color: #3babd0;
+	}
+</style>

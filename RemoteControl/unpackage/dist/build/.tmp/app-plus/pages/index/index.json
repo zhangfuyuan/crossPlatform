@@ -1,0 +1,17 @@
+{
+  "navigationBarTitleText": "uni-app",
+  "subNVues": [
+    {
+      "id": "concat",
+      "path": "pages/index/subNVue/popup",
+      "style": {
+        "position": "absolute",
+        "dock": "right",
+        "width": "100upx",
+        "height": "150upx",
+        "background": "#FF0000"
+      }
+    }
+  ],
+  "usingComponents": {}
+}

@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/block/block"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationStyle": "custom",
+    "animationType": "none"
+  },
+  "nvue": {
+    "pages": {
+      "pages/index/index.html": {
+        "window": {
+          "usingComponents": {}
+        }
+      }
+    },
+    "entryPagePath": "pages/index/index"
+  },
+  "splashscreen": {
+    "alwaysShowBeforeRender": true,
+    "autoclose": false
+  },
+  "appname": "faceDetect",
+  "compilerVersion": "1.9.4",
+  "usingComponents": {}
+}
